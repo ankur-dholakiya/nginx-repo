@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         SERVER_USER = 'ubuntu' // Change this if your username is different
-        SERVER_IP = 'your_server_ip' // Replace with your server's IP
+        SERVER_IP = 'http://65.1.131.103/' // Replace with your server's IP
         TARGET_DIR = '/home/ubuntu/nginx-repo'
         GIT_REPO = 'https://github.com/ankur-dholakiya/nginx-repo.git'
     }
