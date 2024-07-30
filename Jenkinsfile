@@ -5,6 +5,7 @@ pipeline {
         SERVER_IP = '65.1.131.103' // Replace with your actual server IP address
         TARGET_DIR = '/home/ubuntu/nginx-repo'
         GIT_REPO = 'https://github.com/ankur-dholakiya/nginx-repo.git'
+        SSH_CREDENTIALS_ID = 'your-ssh-credentials-id' // Replace with your SSH credentials ID
     }
     stages {
         stage('Checkout') {
@@ -21,18 +22,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Ensure rsync is installed
-                    sh '''
-                    if ! [ -x "$(command -v rsync)" ]; then
-                        sudo apt-get update && sudo apt-get install -y rsync
-                    fi
-                    '''
-                    
-                    // Ensure the target directory exists and deploy the code
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "mkdir -p ${TARGET_DIR}"
-                    rsync -av --delete -e "ssh -o StrictHostKeyChecking=no" ./ ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR}/
-                    '''
+                    withCredentials([sshUserPrivateKey(credentialsId: "${SSH_CREDENTIALS_ID}", keyFileVariable: 'SSH_KEY')]) {
+                        // Ensure rsync is installed
+                        sh '''
+                        if ! [ -x "$(command -v rsync)" ]; then
+                            sudo apt-get update && sudo apt-get install -y rsync
+                        fi
+                        '''
+                        
+                        // Ensure the target directory exists and deploy the code
+                        sh '''
+                        ssh -i $SSH_KEY -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "mkdir -p ${TARGET_DIR}"
+                        rsync -av --delete -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" ./ ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR}/
+                        '''
+                    }
                 }
             }
         }
