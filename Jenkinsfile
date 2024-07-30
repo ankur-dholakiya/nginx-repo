@@ -1,6 +1,8 @@
 pipeline {
     agent any
     environment {
+        SERVER_USER = 'ubuntu' // Change this if your username is different
+        SERVER_IP = '65.1.131.103' // Replace with your actual server IP address
         TARGET_DIR = '/home/ubuntu/nginx-repo'
         GIT_REPO = 'https://github.com/ankur-dholakiya/nginx-repo.git'
     }
@@ -19,17 +21,17 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Ensure rsync is installed (if you are still using it)
+                    // Ensure rsync is installed
                     sh '''
                     if ! [ -x "$(command -v rsync)" ]; then
                         sudo apt-get update && sudo apt-get install -y rsync
                     fi
                     '''
                     
-                    // Deploy the code by copying files to the target directory
+                    // Ensure the target directory exists and deploy the code
                     sh '''
-                    mkdir -p ${TARGET_DIR}
-                    rsync -av --delete ./ ${TARGET_DIR}/
+                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "mkdir -p ${TARGET_DIR}"
+                    rsync -av --delete -e "ssh -o StrictHostKeyChecking=no" ./ ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR}/
                     '''
                 }
             }
