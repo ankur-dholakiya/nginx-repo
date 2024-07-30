@@ -1,30 +1,37 @@
 pipeline {
     agent any
+    environment {
+        SERVER_USER = 'ubuntu' // Change this if your username is different
+        SERVER_IP = 'your_server_ip' // Replace with your server's IP
+        TARGET_DIR = '/home/ubuntu/nginx-repo'
+        GIT_REPO = 'https://github.com/ankur-dholakiya/nginx-repo.git'
+    }
     stages {
         stage('Checkout') {
             steps {
-                // Check out the code from Git
-                checkout scm
+                git branch: 'main', url: "${env.GIT_REPO}"
             }
         }
         stage('Build') {
             steps {
-                // Perform any build steps if necessary
-                echo "Building code..."
+                echo 'Building code...'
+                // Add your build steps here
             }
         }
         stage('Deploy') {
             steps {
                 script {
-                    // Use SSH or another method to deploy the code
-                    sh 'rsync -av --delete ./ /home/ubuntu/my-nginx-repo/'
+                    // Ensure the target directory exists and deploy the code using rsync
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "mkdir -p ${TARGET_DIR}"
+                    rsync -av --delete -e "ssh -o StrictHostKeyChecking=no" ./ ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR}/
+                    '''
                 }
             }
         }
     }
     post {
         always {
-            // Clean up workspace after build
             cleanWs()
         }
     }
