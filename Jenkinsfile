@@ -25,11 +25,21 @@ pipeline {
             }
         }
         
+        stage('Setup SSH') {
+            steps {
+                script {
+                    // Ensure the .ssh directory exists
+                    sh 'mkdir -p /var/jenkins_home/.ssh'
+                    
+                    // Add the host key to known_hosts
+                    sh 'ssh-keyscan -H 13.234.20.228 >> /var/jenkins_home/.ssh/known_hosts'
+                }
+            }
+        }
+        
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
-                // Add the server key to known_hosts (not recommended for production)
-                sh 'ssh-keyscan -H 13.234.20.228 >> ~/.ssh/known_hosts'
                 sh 'scp -r * ubuntu@13.234.20.228:/home/ubuntu/nginx-repo'
             }
         }
