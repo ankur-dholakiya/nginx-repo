@@ -1,29 +1,36 @@
 pipeline {
     agent any
-    environment {
-        DEPLOY_DIR = '/home/ubuntu/nginx-repo'
-    }
+
     stages {
         stage('Checkout SCM') {
             steps {
-                git url: 'https://github.com/ankur-dholakiya/nginx-repo.git', branch: 'main'
+                git 'https://github.com/ankur-dholakiya/nginx-repo.git'
             }
         }
+        
         stage('Build') {
             steps {
                 echo 'Building...'
+                // Add your build steps here
             }
         }
+        
         stage('Test') {
             steps {
                 echo 'Testing...'
+                // Add your test steps here
             }
         }
+        
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['your-ssh-credential-id']) {
+                echo 'Deploying...'
+                script {
+                    def targetDir = '/home/ubuntu/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
+
                     sh """
-                    rsync -avz --delete ${WORKSPACE}/ ${DEPLOY_DIR}
+                    cp -r ${sourceDir}/* ${targetDir}/
                     """
                 }
             }
