@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout SCM') {
             steps {
@@ -28,7 +28,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
-                // Assuming you have SSH access to your server
+                // Add the server key to known_hosts (not recommended for production)
+                sh 'ssh-keyscan -H 13.234.20.228 >> ~/.ssh/known_hosts'
                 sh 'scp -r * ubuntu@13.234.20.228:/home/ubuntu/nginx-repo'
             }
         }
