@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        DEPLOY_DIR = '/home/ubuntu/nginx-repo'
+    }
     stages {
         stage('Checkout SCM') {
             steps {
@@ -16,18 +19,13 @@ pipeline {
                 echo 'Testing...'
             }
         }
-        stage('Setup SSH') {
-            steps {
-                script {
-                    sh 'mkdir -p ~/.ssh'
-                    sh 'echo "your-ssh-key-content" > ~/.ssh/id_rsa'
-                    sh 'chmod 600 ~/.ssh/id_rsa'
-                }
-            }
-        }
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                sshagent(credentials: ['your-ssh-credential-id']) {
+                    sh """
+                    rsync -avz --delete ${WORKSPACE}/ ${DEPLOY_DIR}
+                    """
+                }
             }
         }
     }
