@@ -4,24 +4,24 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git 'https://github.com/ankur-dholakiya/nginx-repo.git'
+                git branch: 'main', url: 'https://github.com/ankur-dholakiya/nginx-repo.git'
             }
         }
-        
+
         stage('Build') {
             steps {
                 echo 'Building...'
                 // Add your build steps here
             }
         }
-        
+
         stage('Test') {
             steps {
                 echo 'Testing...'
                 // Add your test steps here
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
