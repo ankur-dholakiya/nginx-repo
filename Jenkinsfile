@@ -29,7 +29,7 @@ pipeline {
             steps {
                 echo 'Deploying...'
                 // Assuming you have SSH access to your server
-                sh 'scp -r * ubuntu@your-server-ip:/home/ubuntu/nginx-repo'
+                sh 'scp -r * ubuntu@13.234.20.228:/home/ubuntu/nginx-repo'
             }
         }
         
