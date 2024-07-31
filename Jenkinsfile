@@ -30,7 +30,7 @@ pipeline {
                     def sourceDir = "${env.WORKSPACE}"
 
                     sh """
-                    cp -r ${sourceDir}/* ${targetDir}/
+                    sudo cp -r ${sourceDir}/* ${targetDir}/
                     """
                 }
             }
