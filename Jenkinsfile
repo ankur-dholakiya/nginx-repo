@@ -1,43 +1,43 @@
 pipeline {
-    agent any 
-
+    agent any
+    
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                // Checkout the code from GitHub
                 checkout([$class: 'GitSCM',
-                          userRemoteConfigs: [[url: 'https://github.com/ankur-dholakiya/nginx-repo.git']],
-                          branches: [[name: '*/main']]
+                          branches: [[name: '*/main']],
+                          userRemoteConfigs: [[url: 'https://github.com/ankur-dholakiya/nginx-repo.git']]
                 ])
             }
         }
-
+        
         stage('Build') {
             steps {
                 echo 'Building...'
-                // Add build steps here (e.g., make, mvn, npm install, etc.)
+                // Add your build steps here
             }
         }
-
+        
         stage('Test') {
             steps {
                 echo 'Testing...'
-                // Add test steps here (e.g., running unit tests)
+                // Add your test steps here
             }
         }
-
+        
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
-                // Add deployment steps here (e.g., deployment scripts)
+                // Assuming you have SSH access to your server
+                sh 'scp -r * ubuntu@your-server-ip:/home/ubuntu/nginx-repo'
             }
         }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-            // Clean up steps if necessary (e.g., deleting temporary files)
+        
+        stage('Post Actions') {
+            steps {
+                echo 'Cleaning up...'
+                // Add your cleanup steps here
+            }
         }
     }
 }
