@@ -1,44 +1,39 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'nginx:latest'
-        DOCKER_CONTAINER_NAME = 'nginx-container'
-        DOCKER_PORT = '1234'
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
                 git branch: 'dev', url: 'https://github.com/ankur-dholakiya/nginx-repo.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
-                script {
-                    docker.build(DOCKER_IMAGE)
-                }
+                echo 'Building...'
+                // Add your build steps here
             }
         }
 
-        stage('Deploy Docker Container') {
+        stage('Test') {
             steps {
-                script {
-                    // Stop and remove any existing container
-                    sh "docker stop ${DOCKER_CONTAINER_NAME} || true"
-                    sh "docker rm ${DOCKER_CONTAINER_NAME} || true"
-                    
-                    // Run the new container
-                    sh "docker run -d --name ${DOCKER_CONTAINER_NAME} -p ${DOCKER_PORT}:80 ${DOCKER_IMAGE}"
-                }
+                echo 'Testing...'
+                // Add your test steps here
             }
         }
-    }
 
-    post {
-        always {
-            cleanWs()
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+                script {
+                    def targetDir = '/home/ubuntu/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
+
+                    sh """
+                    sudo cp -r ${sourceDir}/* ${targetDir}/
+                    """
+                }
+            }
         }
     }
 }
