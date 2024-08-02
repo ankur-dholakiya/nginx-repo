@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/ankur-dholakiya/nginx-repo.git'
+                git branch: 'dev', url: 'https://github.com/ankur-dholakiya/nginx-repo.git'
             }
         }
 
