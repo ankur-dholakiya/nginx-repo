@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout SCM') {
             steps {
                 // Checkout the current branch from your GitHub repository
-                checkout([$class: 'GitSCM', branches: [[name: "${env.GIT_BRANCH}"]], 
+                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], 
                           userRemoteConfigs: [[url: 'https://github.com/ankur-dholakiya/nginx-repo.git']]])
             }
         }
@@ -26,7 +26,7 @@ pipeline {
 
         stage('Deploy to Nginx') {
             when {
-                branch 'origin/dev'
+                branch 'dev'
             }
             steps {
                 echo 'Deploying to Nginx...'
@@ -44,7 +44,7 @@ pipeline {
 
         stage('Create Pull Request') {
             when {
-                branch 'origin/dev'
+                branch 'dev'
             }
             steps {
                 script {
@@ -65,7 +65,7 @@ pipeline {
 
         stage('Merge Pull Request') {
             when {
-                branch 'origin/dev'
+                branch 'dev'
             }
             steps {
                 script {
@@ -93,7 +93,7 @@ pipeline {
 
         stage('Deploy to Apache') {
             when {
-                branch 'origin/dev'
+                branch 'qa'
             }
             steps {
                 echo 'Deploying to Apache...'
