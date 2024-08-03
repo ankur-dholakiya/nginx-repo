@@ -4,8 +4,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                // Checkout the current branch from your GitHub repository
-                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], 
+                checkout([$class: 'GitSCM', branches: [[name: '*/dev']],
                           userRemoteConfigs: [[url: 'https://github.com/ankur-dholakiya/nginx-repo.git']]])
             }
         }
