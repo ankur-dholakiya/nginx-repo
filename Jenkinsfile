@@ -6,14 +6,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                node {
+                node('master') { // Specify 'master' or the label of the node you want to use
                     checkout scm
                 }
             }
         }
         stage('Build') {
             steps {
-                node {
+                node('master') { // Specify 'master' or the label of the node you want to use
                     script {
                         // Add your build commands here
                         echo "Building project..."
@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Merge Pull Request') {
             steps {
-                node {
+                node('master') { // Specify 'master' or the label of the node you want to use
                     script {
                         // Merge dev branch into qa branch
                         def prNumber = sh(script: '''
@@ -50,7 +50,7 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                node {
+                node('master') { // Specify 'master' or the label of the node you want to use
                     script {
                         echo "Deploying to Nginx..."
                         // Clone the GitHub repo and deploy to /home/ubuntu/nginx-repo
@@ -67,7 +67,7 @@ pipeline {
                 branch 'qa'
             }
             steps {
-                node {
+                node('master') { // Specify 'master' or the label of the node you want to use
                     script {
                         echo "Deploying to Apache..."
                         // Clone the GitHub repo and deploy to /var/www/html/nginx-repo
@@ -82,7 +82,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node('master') { // Specify 'master' or the label of the node you want to use
                 cleanWs() // Clean workspace after build
             }
         }
