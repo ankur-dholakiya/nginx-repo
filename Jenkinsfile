@@ -72,7 +72,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node('any') { // Specify the label for the node
                 cleanWs() // Clean workspace after build
             }
         }
