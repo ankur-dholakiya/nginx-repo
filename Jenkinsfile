@@ -32,7 +32,9 @@ pipeline {
 
         stage('Deploy to Nginx') {
             when {
-                branch 'origin/dev'
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
             }
             steps {
                 echo 'Deploying to Nginx...'
@@ -50,7 +52,9 @@ pipeline {
 
         stage('Create Pull Request') {
             when {
-                branch 'origin/dev'
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
             }
             steps {
                 script {
@@ -71,7 +75,9 @@ pipeline {
 
         stage('Merge Pull Request') {
             when {
-                branch 'origin/dev'
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
             }
             steps {
                 script {
@@ -99,7 +105,9 @@ pipeline {
 
         stage('Deploy to Apache') {
             when {
-                branch 'origin/qa'
+                expression {
+                    env.GIT_BRANCH ==~ /.*qa$/
+                }
             }
             steps {
                 echo 'Deploying to Apache...'
