@@ -57,7 +57,7 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'token', variable: 'GITHUB_TOKEN')]) {
                         sh """
                         curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" \
                         https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls \
@@ -80,7 +80,7 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'token', variable: 'GITHUB_TOKEN')]) {
                         def prNumber = sh(
                             script: "curl -s -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq '.[] | select(.head.ref==\"dev\") | .number'",
                             returnStdout: true
