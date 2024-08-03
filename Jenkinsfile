@@ -24,36 +24,27 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Nginx') {
+            when {
+                branch 'origin/dev'
+            }
             steps {
-                echo 'Deploying...'
+                echo 'Deploying to Nginx...'
                 script {
-                    if (env.GIT_BRANCH == 'origin/dev') {
-                        def targetDir = '/home/ubuntu/nginx-repo'
-                        def sourceDir = "${env.WORKSPACE}"
+                    def targetDir = '/home/ubuntu/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
 
-                        // Ensure target directory is empty before copying new files
-                        sh """
-                        # Synchronize the files from source to target directory
-                        sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
-                        """
-                    } else if (env.GIT_BRANCH == 'origin/qa') {
-                        def targetDir = '/var/www/html/nginx-repo'
-                        def sourceDir = "${env.WORKSPACE}"
-
-                        // Ensure target directory is empty before copying new files
-                        sh """
-                        # Synchronize the files from source to target directory
-                        sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
-                        """
-                    }
+                    // Ensure target directory is empty before copying new files
+                    sh """
+                    sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
+                    """
                 }
             }
         }
 
         stage('Create Pull Request') {
             when {
-                branch 'dev'
+                branch 'origin/dev'
             }
             steps {
                 script {
@@ -68,6 +59,52 @@ pipeline {
                         }'
                         """
                     }
+                }
+            }
+        }
+
+        stage('Merge Pull Request') {
+            when {
+                branch 'origin/dev'
+            }
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                        def prNumber = sh(
+                            script: "curl -s -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq '.[] | select(.head.ref==\"dev\") | .number'",
+                            returnStdout: true
+                        ).trim()
+
+                        if (prNumber) {
+                            sh """
+                            curl -X PUT -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" \
+                            https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls/${prNumber}/merge \
+                            -d '{
+                                "commit_title": "Merging dev into qa",
+                                "commit_message": "Automatically merged by Jenkins pipeline",
+                                "merge_method": "merge"
+                            }'
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Apache') {
+            when {
+                branch 'origin/dev'
+            }
+            steps {
+                echo 'Deploying to Apache...'
+                script {
+                    def targetDir = '/var/www/html/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
+
+                    // Ensure target directory is empty before copying new files
+                    sh """
+                    sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
+                    """
                 }
             }
         }
