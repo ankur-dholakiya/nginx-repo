@@ -72,8 +72,10 @@ pipeline {
     }
     post {
         always {
-            script {
-                cleanWs() // Clean workspace after build
+            node {
+                script {
+                    cleanWs() // Clean workspace after build
+                }
             }
         }
     }
