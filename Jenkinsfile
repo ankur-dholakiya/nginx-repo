@@ -10,6 +10,12 @@ pipeline {
             }
         }
 
+        stage('Print Branch Name') {
+            steps {
+                echo "Branch name: ${env.GIT_BRANCH}"
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building...'
@@ -26,7 +32,7 @@ pipeline {
 
         stage('Deploy to Nginx') {
             when {
-                branch 'dev'
+                branch 'origin/dev'
             }
             steps {
                 echo 'Deploying to Nginx...'
@@ -44,7 +50,7 @@ pipeline {
 
         stage('Create Pull Request') {
             when {
-                branch 'dev'
+                branch 'origin/dev'
             }
             steps {
                 script {
@@ -65,7 +71,7 @@ pipeline {
 
         stage('Merge Pull Request') {
             when {
-                branch 'dev'
+                branch 'origin/dev'
             }
             steps {
                 script {
@@ -93,7 +99,7 @@ pipeline {
 
         stage('Deploy to Apache') {
             when {
-                branch 'qa'
+                branch 'origin/qa'
             }
             steps {
                 echo 'Deploying to Apache...'
