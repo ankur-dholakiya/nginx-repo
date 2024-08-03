@@ -12,13 +12,15 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Your build commands here
+                    // Add your build commands here
+                    echo "Building project..."
                 }
             }
         }
         stage('Merge Pull Request') {
             steps {
                 script {
+                    // Merge dev branch into qa branch
                     def prNumber = sh(script: '''
                         curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq .[] | select(.head.ref=="dev") | .number
                     ''', returnStdout: true).trim()
@@ -31,6 +33,8 @@ pipeline {
                                 "merge_method": "merge"
                             }'
                         '''
+                    } else {
+                        echo "No open PR found to merge."
                     }
                 }
             }
@@ -40,11 +44,14 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                sh '''
+                script {
                     echo "Deploying to Nginx..."
-                    # Add commands to deploy to /home/ubuntu/nginx-repo
-                    # Example: rsync or cp command
-                '''
+                    // Clone the GitHub repo and deploy to /home/ubuntu/nginx-repo
+                    sh '''
+                        rm -rf /home/ubuntu/nginx-repo
+                        git clone https://github.com/ankur-dholakiya/nginx-repo.git /home/ubuntu/nginx-repo
+                    '''
+                }
             }
         }
         stage('Deploy to Apache') {
@@ -52,11 +59,14 @@ pipeline {
                 branch 'qa'
             }
             steps {
-                sh '''
+                script {
                     echo "Deploying to Apache..."
-                    # Add commands to deploy to /var/www/html/nginx-repo
-                    # Example: rsync or cp command
-                '''
+                    // Clone the GitHub repo and deploy to /var/www/html/nginx-repo
+                    sh '''
+                        rm -rf /var/www/html/nginx-repo
+                        git clone https://github.com/ankur-dholakiya/nginx-repo.git /var/www/html/nginx-repo
+                    '''
+                }
             }
         }
     }
