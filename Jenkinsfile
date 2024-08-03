@@ -1,44 +1,125 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'nginx:latest'
-        DOCKER_CONTAINER_NAME = 'nginx-container'
-        DOCKER_PORT = '1234'
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/ankur-dholakiya/nginx-repo.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/dev']],
+                          userRemoteConfigs: [[url: 'https://github.com/ankur-dholakiya/nginx-repo.git']]])
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Print Branch Name') {
             steps {
+                echo "Branch name: ${env.GIT_BRANCH}"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building...'
+                // Add your build steps here
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+                // Add your test steps here
+            }
+        }
+
+        stage('Deploy to Nginx') {
+            when {
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
+            }
+            steps {
+                echo 'Deploying to Nginx...'
                 script {
-                    docker.build(DOCKER_IMAGE)
+                    def targetDir = '/home/ubuntu/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
+
+                    // Ensure target directory is empty before copying new files
+                    sh """
+                    sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
+                    """
                 }
             }
         }
 
-        stage('Deploy Docker Container') {
+        stage('Create Pull Request') {
+            when {
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
+            }
             steps {
                 script {
-                    // Stop and remove any existing container
-                    sh "docker stop ${DOCKER_CONTAINER_NAME} || true"
-                    sh "docker rm ${DOCKER_CONTAINER_NAME} || true"
-                    
-                    // Run the new container
-                    sh "docker run -d --name ${DOCKER_CONTAINER_NAME} -p ${DOCKER_PORT}:80 ${DOCKER_IMAGE}"
+                    withCredentials([string(credentialsId: 'token', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls \
+                        -d '{
+                            "title": "Merge dev into qa",
+                            "head": "dev",
+                            "base": "qa"
+                        }'
+                        """
+                    }
                 }
             }
         }
-    }
 
-    post {
-        always {
-            cleanWs()
+        stage('Merge Pull Request') {
+            when {
+                expression {
+                    env.GIT_BRANCH ==~ /.*dev$/
+                }
+            }
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'token', variable: 'GITHUB_TOKEN')]) {
+                        def prNumber = sh(
+                            script: "curl -s -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq '.[] | select(.head.ref==\"dev\") | .number'",
+                            returnStdout: true
+                        ).trim()
+
+                        if (prNumber) {
+                            sh """
+                            curl -X PUT -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" \
+                            https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls/${prNumber}/merge \
+                            -d '{
+                                "commit_title": "Merging dev into qa",
+                                "commit_message": "Automatically merged by Jenkins pipeline",
+                                "merge_method": "merge"
+                            }'
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Apache') {
+            when {
+                expression {
+                    env.GIT_BRANCH ==~ /.*qa$/
+                }
+            }
+            steps {
+                echo 'Deploying to Apache...'
+                script {
+                    def targetDir = '/var/www/html/nginx-repo'
+                    def sourceDir = "${env.WORKSPACE}"
+
+                    // Ensure target directory is empty before copying new files
+                    sh """
+                    sudo rsync -av --delete ${sourceDir}/ ${targetDir}/
+                    """
+                }
+            }
         }
     }
 }
