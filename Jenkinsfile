@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        GITHUB_TOKEN = credentials('github-token') // Replace with your GitHub token credentials ID
+        GITHUB_TOKEN = credentials('ggithub-token') // Replace with your GitHub token credentials ID
     }
     stages {
         stage('Checkout') {
