@@ -1,5 +1,5 @@
 pipeline {
-    agent any // Use any available agent
+    agent { label 'master' } // Use the label of an existing agent
     environment {
         GITHUB_TOKEN = credentials('github-token') // Replace with your GitHub token credentials ID
     }
@@ -22,17 +22,17 @@ pipeline {
                 script {
                     // Merge dev branch into qa branch
                     def prNumber = sh(script: '''
-                        curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq .[] | select(.head.ref=="dev") | .number
+                        curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls | jq -r '.[] | select(.head.ref=="dev") | .number'
                     ''', returnStdout: true).trim()
                     
                     if (prNumber) {
-                        sh '''
+                        sh """
                             curl -X PUT -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ankur-dholakiya/nginx-repo/pulls/${prNumber}/merge -d '{
                                 "commit_title": "Merging dev into qa",
                                 "commit_message": "Automatically merged by Jenkins pipeline",
                                 "merge_method": "merge"
                             }'
-                        '''
+                        """
                     } else {
                         echo "No open PR found to merge."
                     }
@@ -72,9 +72,7 @@ pipeline {
     }
     post {
         always {
-            node('any') { // Specify the label for the node
-                cleanWs() // Clean workspace after build
-            }
+            cleanWs() // Clean workspace after build
         }
     }
 }
