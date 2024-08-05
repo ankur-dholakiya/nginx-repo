@@ -95,11 +95,9 @@ pipeline {
     }
     post {
         always {
-            node {
-                script {
-                    echo "Cleaning up workspace..."
-                    deleteDir()
-                }
+            script {
+                echo "Cleaning up workspace..."
+                deleteDir()
             }
         }
     }
