@@ -6,7 +6,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    // Ensure that the workspace is cleaned before checkout
+                    deleteDir()
+                    checkout scm
+                }
             }
         }
         stage('Deploy to Nginx') {
@@ -91,10 +95,9 @@ pipeline {
     }
     post {
         always {
-            node('master') { // Use 'master' label or specify an appropriate label for your environment
-                script {
-                    cleanWs() // Clean workspace after build
-                }
+            script {
+                echo "Cleaning up workspace..."
+                cleanWs() // Clean workspace after build
             }
         }
     }
