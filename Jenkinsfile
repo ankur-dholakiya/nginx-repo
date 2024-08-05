@@ -7,7 +7,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    deleteDir() // Clean workspace before checkout
                     checkout scm
                 }
             }
@@ -93,8 +92,8 @@ pipeline {
     post {
         always {
             script {
-                echo "Cleaning up workspace..."
-                deleteDir()
+                echo "Post build actions..."
+                // Skipped clean up
             }
         }
     }
