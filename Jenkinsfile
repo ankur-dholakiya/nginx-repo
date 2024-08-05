@@ -7,8 +7,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Clean the workspace before checkout
-                    deleteDir() // This deletes everything in the workspace
+                    deleteDir() // Clean workspace before checkout
                     checkout scm
                 }
             }
@@ -20,7 +19,6 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to Nginx..."
-                    // Deploy to /home/ubuntu/nginx-repo
                     sh '''
                         rm -rf /home/ubuntu/nginx-repo
                         git clone https://github.com/ankur-dholakiya/nginx-repo.git /home/ubuntu/nginx-repo
@@ -84,7 +82,6 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to Apache..."
-                    // Deploy to /var/www/html/nginx-repo
                     sh '''
                         rm -rf /var/www/html/nginx-repo
                         git clone https://github.com/ankur-dholakiya/nginx-repo.git /var/www/html/nginx-repo
