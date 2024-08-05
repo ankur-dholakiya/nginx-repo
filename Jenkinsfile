@@ -8,7 +8,7 @@ pipeline {
             steps {
                 script {
                     // Clean the workspace before checkout
-                    deleteDir()
+                    deleteDir() // This deletes everything in the workspace
                     checkout scm
                 }
             }
@@ -97,7 +97,8 @@ pipeline {
         always {
             script {
                 echo "Cleaning up workspace..."
-                cleanWs() // Clean workspace after build
+                // Ensure workspace cleanup is done inside a node context
+                deleteDir()
             }
         }
     }
