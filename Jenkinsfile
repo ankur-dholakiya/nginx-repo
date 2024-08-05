@@ -95,10 +95,11 @@ pipeline {
     }
     post {
         always {
-            script {
-                echo "Cleaning up workspace..."
-                // Ensure workspace cleanup is done inside a node context
-                deleteDir()
+            node {
+                script {
+                    echo "Cleaning up workspace..."
+                    deleteDir()
+                }
             }
         }
     }
