@@ -91,7 +91,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node('master') { // Use 'master' label or specify an appropriate label for your environment
                 script {
                     cleanWs() // Clean workspace after build
                 }
