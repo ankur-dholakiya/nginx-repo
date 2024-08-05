@@ -91,7 +91,9 @@ pipeline {
     }
     post {
         always {
-            cleanWs() // Clean workspace after build
+            node {
+                cleanWs() // Clean workspace after build
+            }
         }
     }
 }
