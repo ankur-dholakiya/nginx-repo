@@ -20,7 +20,7 @@ pipeline {
                 script {
                     echo "Deploying to Nginx..."
                     sh '''
-                        rm -rf /home/ubuntu/nginx-repo
+                        rm -rf /home/ubuntu/nginx-repo || true
                         git clone https://github.com/ankur-dholakiya/nginx-repo.git /home/ubuntu/nginx-repo
                     '''
                 }
@@ -83,7 +83,7 @@ pipeline {
                 script {
                     echo "Deploying to Apache..."
                     sh '''
-                        rm -rf /var/www/html/nginx-repo
+                        rm -rf /var/www/html/nginx-repo || true
                         git clone https://github.com/ankur-dholakiya/nginx-repo.git /var/www/html/nginx-repo
                     '''
                 }
@@ -92,11 +92,9 @@ pipeline {
     }
     post {
         always {
-            node {
-                script {
-                    echo "Cleaning up workspace..."
-                    deleteDir()
-                }
+            script {
+                echo "Cleaning up workspace..."
+                deleteDir()
             }
         }
     }
